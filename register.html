@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registration – CCS Sit-In Monitoring</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="register-page">
+
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">College of Computer Studies Sit-in Monitoring System</a>
+    <ul class="navbar-nav">
+      <li><a href="index.html">Home</a></li>
+      <li class="nav-dropdown">
+        <a href="#">Community ▾</a>
+        <div class="dropdown-menu">
+          <a href="#">Announcements</a>
+          <a href="#">Resources</a>
+        </div>
+      </li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="login.html">Login</a></li>
+      <li><a href="register.html">Register</a></li>
+    </ul>
+  </nav>
+
+  <!-- Back button -->
+  <a href="login.html" class="btn-back">Back</a>
+
+  <!-- Page title centered at top -->
+  <div class="reg-page-title">REGISTRATION</div>
+
+  <div class="register-body">
+    <div class="register-container">
+
+      <!-- LEFT: Form -->
+      <div class="register-form-side">
+        <h2 class="register-title">Sign up</h2>
+
+        <div id="reg-alert" class="alert"></div>
+
+        <div class="form-group">
+          <input type="text" id="idNumber" class="form-control" placeholder="">
+          <span class="form-control-label">ID Number</span>
+        </div>
+
+        <div class="form-group">
+          <input type="text" id="lastName" class="form-control" placeholder="">
+          <span class="form-control-label">Last Name</span>
+        </div>
+
+        <div class="form-group">
+          <input type="text" id="firstName" class="form-control" placeholder="">
+          <span class="form-control-label">First Name</span>
+        </div>
+
+        <div class="form-group">
+          <input type="text" id="middleName" class="form-control" placeholder="">
+          <span class="form-control-label">Middle Name</span>
+        </div>
+
+        <div class="form-group">
+          <input type="password" id="password" class="form-control" placeholder="">
+          <span class="form-control-label">Password</span>
+        </div>
+
+        <div class="form-group">
+          <input type="password" id="repeatPassword" class="form-control" placeholder="">
+          <span class="form-control-label">Repeat your password</span>
+        </div>
+
+        <div class="form-group">
+          <input type="email" id="email" class="form-control" placeholder="">
+          <span class="form-control-label">Email</span>
+        </div>
+
+        <div class="form-group">
+          <input type="text" id="address" class="form-control" placeholder="">
+          <span class="form-control-label">Address</span>
+        </div>
+
+        <button class="btn-register" onclick="handleRegister()">Register</button>
+      </div>
+
+      <!-- RIGHT: Illustration -->
+      <div class="register-illustration">
+        <svg viewBox="0 0 300 320" width="280" xmlns="http://www.w3.org/2000/svg">
+          <!-- Phone/card UI -->
+          <rect x="160" y="60" width="120" height="180" rx="14" fill="white" stroke="#ddd" stroke-width="1.5"/>
+          <circle cx="220" cy="100" r="28" fill="#e8e0f5" stroke="#c5b8e8" stroke-width="1.5"/>
+          <circle cx="220" cy="96" r="14" fill="#b8a0d8"/>
+          <ellipse cx="220" cy="118" rx="20" ry="10" fill="#c5b8e8"/>
+          <!-- Password dots row 1 -->
+          <circle cx="185" cy="145" r="5" fill="#a08cc0"/>
+          <circle cx="200" cy="145" r="5" fill="#a08cc0"/>
+          <circle cx="215" cy="145" r="5" fill="#a08cc0"/>
+          <circle cx="230" cy="145" r="5" fill="#a08cc0"/>
+          <circle cx="245" cy="145" r="5" fill="#a08cc0"/>
+          <circle cx="260" cy="145" r="5" fill="#a08cc0"/>
+          <!-- Password dots row 2 -->
+          <circle cx="185" cy="165" r="5" fill="#c5b8e8"/>
+          <circle cx="200" cy="165" r="5" fill="#c5b8e8"/>
+          <circle cx="215" cy="165" r="5" fill="#c5b8e8"/>
+          <circle cx="230" cy="165" r="5" fill="#c5b8e8"/>
+          <circle cx="245" cy="165" r="5" fill="#c5b8e8"/>
+          <circle cx="260" cy="165" r="5" fill="#c5b8e8"/>
+          <!-- Sign Up button -->
+          <rect x="195" y="188" width="52" height="18" rx="9" fill="#dc3545"/>
+          <text x="221" y="200" text-anchor="middle" fill="white" font-size="8" font-family="Roboto,sans-serif">Sign Up</text>
+          <!-- Little plants/decoration -->
+          <ellipse cx="175" cy="255" rx="8" ry="12" fill="#a8d5b0" transform="rotate(-15,175,255)"/>
+          <ellipse cx="185" cy="250" rx="6" ry="10" fill="#7ec891" transform="rotate(10,185,250)"/>
+          <line x1="178" y1="258" x2="178" y2="275" stroke="#7ec891" stroke-width="1.5"/>
+          <ellipse cx="255" cy="258" rx="8" ry="12" fill="#a8d5b0" transform="rotate(15,255,258)"/>
+          <line x1="255" y1="262" x2="255" y2="275" stroke="#7ec891" stroke-width="1.5"/>
+          <!-- Curved connecting line -->
+          <path d="M 95 130 Q 140 80 165 100" stroke="#555" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/>
+          <circle cx="95" cy="130" r="4" fill="#555"/>
+
+          <!-- Person body -->
+          <!-- Head -->
+          <circle cx="80" cy="100" r="22" fill="#f5c9a0"/>
+          <!-- Hair -->
+          <ellipse cx="80" cy="83" rx="22" ry="10" fill="#4a3728"/>
+          <!-- Body/shirt - purple-blue -->
+          <rect x="52" y="118" width="56" height="60" rx="8" fill="#6b7fd4"/>
+          <!-- Arms -->
+          <path d="M 52 128 Q 30 145 38 165" stroke="#6b7fd4" stroke-width="16" stroke-linecap="round" fill="none"/>
+          <path d="M 108 128 Q 128 140 120 158" stroke="#6b7fd4" stroke-width="16" stroke-linecap="round" fill="none"/>
+          <!-- Laptop in hands -->
+          <rect x="28" y="158" width="50" height="30" rx="4" fill="#e0e0e0" stroke="#ccc" stroke-width="1"/>
+          <rect x="30" y="160" width="46" height="24" rx="3" fill="#c8d8f0"/>
+          <!-- Hands -->
+          <ellipse cx="38" cy="165" rx="8" ry="7" fill="#f5c9a0"/>
+          <ellipse cx="78" cy="168" rx="8" ry="7" fill="#f5c9a0"/>
+          <!-- Pants - yellow/gold -->
+          <rect x="55" y="172" width="22" height="55" rx="5" fill="#e8c840"/>
+          <rect x="82" y="172" width="22" height="55" rx="5" fill="#e8c840"/>
+          <!-- Shoes -->
+          <ellipse cx="66" cy="228" rx="14" ry="7" fill="#e05040"/>
+          <ellipse cx="93" cy="228" rx="14" ry="7" fill="#e05040"/>
+        </svg>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="footer">© 2024 College of Computer Studies</footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/app.js"></script>
+  <script>
+    if (Auth.current()) {
+      window.location.href = Auth.isAdmin() ? 'pages/admin-dashboard.html' : 'pages/student-dashboard.html';
+    }
+
+    async function handleRegister() {
+      const fields = {
+        idNumber: document.getElementById('idNumber').value.trim(),
+        lastName: document.getElementById('lastName').value.trim(),
+        firstName: document.getElementById('firstName').value.trim(),
+        middleName: document.getElementById('middleName').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        password: document.getElementById('password').value,
+        address: document.getElementById('address').value.trim()
+      };
+      const repeat = document.getElementById('repeatPassword').value;
+
+      if (!fields.idNumber || !fields.lastName || !fields.firstName || !fields.email || !fields.password) {
+        showAlert('reg-alert', 'Please fill in all required fields.'); return;
+      }
+      if (fields.password !== repeat) { showAlert('reg-alert', 'Passwords do not match.'); return; }
+      if (fields.password.length < 6) { showAlert('reg-alert', 'Password must be at least 6 characters.'); return; }
+
+      const result = await Auth.register(fields);
+      if (result.error) { showAlert('reg-alert', result.error); return; }
+
+      showAlert('reg-alert', 'Registration successful! Redirecting to login...', 'success');
+      setTimeout(() => window.location.href = 'login.html', 2000);
+    }
+  </script>
+</body>
+</html>

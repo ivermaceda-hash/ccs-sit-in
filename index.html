@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CCS Sit-In Monitoring System</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .home-body { flex:1; display:flex; align-items:center; justify-content:center; padding: calc(var(--nav-h)+3rem) 2rem 3rem; }
+    .home-center { text-align:center; }
+    .home-logo { width:200px; height:200px; background:radial-gradient(circle at 40% 40%,#5c35a8,var(--ccs-navy)); border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; border:5px solid var(--ccs-gold); margin:0 auto 2rem; box-shadow:0 6px 30px rgba(74,44,143,0.3); }
+    .home-logo .ccs-logo-inner { font-size:2.5rem; font-weight:900; color:var(--ccs-gold); }
+    .home-logo .ccs-logo-top { font-size:0.5rem; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.7); }
+    .home-logo .ccs-logo-bottom { font-size:0.45rem; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,0.6); }
+    .home-h1 { font-size:1.6rem; font-weight:600; color:var(--ccs-dark); margin-bottom:0.75rem; max-width:500px; }
+    .home-sub { color:var(--ccs-gray); font-size:0.95rem; margin-bottom:2rem; max-width:420px; line-height:1.65; }
+    .home-btns { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
+    .home-btns a { padding:0.55rem 2rem; border-radius:4px; font-size:0.95rem; font-weight:500; text-decoration:none; transition:all 0.15s; }
+    .home-page { min-height:100vh; background:white; display:flex; flex-direction:column; }
+  </style>
+</head>
+<body class="home-page">
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">College of Computer Studies Sit-in Monitoring System</a>
+    <ul class="navbar-nav">
+      <li><a href="index.html">Home</a></li>
+      <li class="nav-dropdown">
+        <a href="#">Community ▾</a>
+        <div class="dropdown-menu">
+          <a href="#">Announcements</a>
+          <a href="#">Resources</a>
+        </div>
+      </li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="login.html">Login</a></li>
+      <li><a href="register.html">Register</a></li>
+    </ul>
+  </nav>
+  <div class="home-body">
+    <div class="home-center">
+      <div class="home-logo">
+        <div class="ccs-logo-top">UC · College of</div>
+        <div class="ccs-logo-inner">CCS</div>
+        <div class="ccs-logo-bottom">Computer Studies</div>
+      </div>
+      <h1 class="home-h1">CCS Sit-In Monitoring System</h1>
+      <p class="home-sub">Manage and track laboratory sit-in sessions at the University of Cebu College of Computer Studies.</p>
+      <div class="home-btns">
+        <a href="login.html" style="background:var(--ccs-blue-btn);color:white;">Login</a>
+        <a href="register.html" style="background:transparent;border:1px solid var(--ccs-purple);color:var(--ccs-purple);">Register</a>
+      </div>
+    </div>
+  </div>
+  <footer class="footer">©  Iver M. Deiparine</footer>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/app.js"></script>
+  <script>
+    if (Auth.current()) {
+      window.location.href = Auth.isAdmin() ? 'pages/admin-dashboard.html' : 'pages/student-dashboard.html';
+    }
+  </script>
+</body>
+</html>

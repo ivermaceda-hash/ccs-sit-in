@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CCS Sit-In Monitoring System</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="login-page">
+
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">College of Computer Studies Sit-in Monitoring System</a>
+    <ul class="navbar-nav">
+      <li><a href="index.html">Home</a></li>
+      <li class="nav-dropdown">
+        <a href="#">Community ▾</a>
+        <div class="dropdown-menu">
+          <a href="#">Announcements</a>
+          <a href="#">Resources</a>
+        </div>
+      </li>
+      <li><a href="login.html">Login</a></li>
+      <li><a href="register.html">Register</a></li>
+    </ul>
+  </nav>
+
+  <div class="login-body">
+    <div class="login-container">
+
+      <!-- LEFT: CCS Logo -->
+      <div class="login-logo-placeholder">
+        <img src="images/ccslogo.png" alt="CCS Logo" class="ccs-logo-image">
+      </div>
+
+      <!-- RIGHT: Login Form -->
+      <div class="login-form-side">
+        <div id="login-alert" class="alert"></div>
+
+        <div style="margin-bottom:0.1rem;">
+          <input type="text" id="idNumber" class="login-input" placeholder="Enter a valid id number">
+          <span class="input-label">ID Number</span>
+        </div>
+
+        <div style="margin-bottom:0.1rem;">
+          <input type="password" id="password" class="login-input" placeholder="Enter password">
+          <span class="input-label">Password</span>
+        </div>
+
+        <div class="login-form-options">
+          <label class="form-check-label">
+            <input type="checkbox" id="remember"> Remember me
+          </label>
+          <a href="#" class="forgot-link">Forgot password?</a>
+        </div>
+
+        <button class="btn-login" onclick="handleLogin()">Login</button>
+
+        <div class="register-link-row">
+          Don't have an account? <a href="register.html">Register</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="footer"> College of Computer Studies</footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/app.js"></script>
+  <script>
+    if (Auth.current()) {
+      window.location.href = Auth.isAdmin() ? 'pages/admin-dashboard.html' : 'pages/student-dashboard.html';
+    }
+
+    async function handleLogin() {
+      const id = document.getElementById('idNumber').value.trim();
+      const pw = document.getElementById('password').value;
+      if (!id || !pw) { showAlert('login-alert', 'Please enter your ID number and password.'); return; }
+      const user = await Auth.login(id, pw);
+      if (!user) { showAlert('login-alert', 'Invalid ID number or password. Please try again.'); return; }
+      window.location.href = user.role === 'admin' ? 'pages/admin-dashboard.html' : 'pages/student-dashboard.html';
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+  </script>
+</body>
+</html>

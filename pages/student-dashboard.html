@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard – CCS</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="../index.html" class="navbar-brand">CCS Sit-In Monitoring</a>
+    <ul class="navbar-nav">
+      <li style="position:relative;">
+        <button style="background:none;border:none;color:rgba(255,255,255,0.9);cursor:pointer;font-size:1.2rem;padding:0.5rem;" onclick="toggleNotificationDropdown()" title="Notifications">🔔 <span id="navbar-notif-badge" class="notification-badge" style="display:none;position:absolute;top:0;right:0;">0</span></button>
+        <div id="notification-dropdown" class="notification-dropdown" style="display:none;">
+          <div class="notification-dropdown-header">Recent Notifications</div>
+          <div id="dropdown-notif-list" class="notification-dropdown-list"></div>
+        </div>
+      </li>
+      <li><span id="nav-user-name" style="color:rgba(255,255,255,0.7);font-size:0.875rem;padding:0 0.75rem;">Loading...</span></li>
+      <li><a href="#" onclick="Auth.logout()">Sign Out</a></li>
+    </ul>
+  </nav>
+
+  <div class="dashboard-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar" id="sb-avatar">?</div>
+          <div class="sidebar-user-info">
+            <div class="name" id="sb-name">Loading...</div>
+            <div class="role">Student</div>
+          </div>
+        </div>
+      </div>
+      <ul class="sidebar-nav">
+        <li class="sidebar-section-title">Menu</li>
+        <li class="sidebar-nav-item active" id="nav-dashboard">
+          <a href="#" onclick="showSection('dashboard')"><span class="nav-icon">🏠</span> Dashboard</a>
+        </li>
+        <li class="sidebar-nav-item" id="nav-profile">
+          <a href="#" onclick="showSection('profile')"><span class="nav-icon">👤</span> Edit Profile</a>
+        </li>
+        <li class="sidebar-nav-item" id="nav-rules">
+          <a href="#" onclick="showSection('rules')"><span class="nav-icon">📜</span> Rules</a>
+        </li>
+        <li class="sidebar-nav-item" id="nav-announcements">
+          <a href="#" onclick="showSection('announcements')"><span class="nav-icon">📣</span> Announcements</a>
+        </li>
+        <li class="sidebar-nav-item" id="nav-rewards">
+          <a href="#" onclick="showSection('rewards')"><span class="nav-icon">🏆</span> Rewards</a>
+        </li>
+        <li class="sidebar-nav-item" id="nav-feedback">
+          <a href="#" onclick="showSection('feedback')"><span class="nav-icon">✉️</span> Feedback</a>
+        </li>
+        <li class="sidebar-nav-item" id="nav-records">
+          <a href="#" onclick="showSection('records')"><span class="nav-icon">📋</span> Sit-In History</a>
+        </li>
+        <li class="sidebar-nav-item" id="nav-notifications">
+          <a href="#" onclick="showSection('notifications')"><span class="nav-icon">🔔</span> Notifications <span id="notification-badge" class="notification-badge" style="display:none;">0</span></a>
+        </li>
+        <li class="sidebar-section-title">Account</li>
+        <li class="sidebar-nav-item">
+          <a href="#" onclick="Auth.logout()"><span class="nav-icon">🚪</span> Sign Out</a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- DASHBOARD SECTION -->
+      <section id="section-dashboard">
+        <div class="page-header">
+          <h1 class="page-title" id="welcome-msg">Welcome!</h1>
+          <p class="page-subtitle">Here's your sit-in summary at a glance.</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon gold">⏱️</div>
+            <div>
+              <div class="stat-value" id="stat-sessions">—</div>
+              <div class="stat-label">Remaining Sessions</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon purple">📅</div>
+            <div>
+              <div class="stat-value" id="stat-total">—</div>
+              <div class="stat-label">Total Sit-Ins</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">✅</div>
+            <div>
+              <div class="stat-value" id="stat-done">—</div>
+              <div class="stat-label">Completed</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon red">🔴</div>
+            <div>
+              <div class="stat-value" id="stat-active">—</div>
+              <div class="stat-label">Active Now</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Current Sit-In -->
+        <div id="current-sitin-box" style="display:none;" class="mb-2">
+          <div class="sitin-card">
+            <div class="sitin-info">
+              <h3>🖥️ Currently Sitting-In</h3>
+              <p id="cs-lab">Lab —</p>
+              <p id="cs-purpose">Purpose: —</p>
+              <p id="cs-timein">Time In: —</p>
+            </div>
+            <div>
+              <div class="timer" id="cs-timer">00:00</div>
+              <button class="btn btn-danger btn-sm mt-1" onclick="endMySitin()">End Session</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sit-in Request -->
+        <div class="card mb-2" id="reservation-box">
+          <div class="card-title">Make a Reservation</div>
+          <div id="reservation-alert" class="alert"></div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Purpose</label>
+              <select id="res-purpose" class="form-control">
+                <option value="C Programming">C Programming</option>
+                <option value="Java Programming">Java Programming</option>
+                <option value="Python Programming">Python Programming</option>
+                <option value="Web Development">Web Development</option>
+                <option value="Database">Database</option>
+                <option value="Research">Research</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Laboratory</label>
+              <select id="res-lab" class="form-control">
+                <option value="Lab 524">Lab 524</option>
+                <option value="Lab 526">Lab 526</option>
+                <option value="Lab 528">Lab 528</option>
+                <option value="Lab 530">Lab 530</option>
+                <option value="Lab 542">Lab 542</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Select PC <small style="color:#888;">(Green = Vacant)</small></label>
+            <div id="pc-grid" style="display:grid;grid-template-columns:repeat(10,1fr);gap:0.5rem;padding:0.5rem;background:var(--ccs-light);border-radius:0.6rem;">
+              <!-- grid rendered by JS -->
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Date</label>
+              <input type="date" id="res-date" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Start Time</label>
+              <input type="time" id="res-start" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">End Time</label>
+              <input type="time" id="res-end" class="form-control">
+            </div>
+          </div>
+          <button class="btn btn-primary" style="width:auto;padding:0.7rem 2rem;" onclick="submitReservation()">Reserve</button>
+          <div id="my-reservations" style="margin-top:1rem;" class="announcement-list">
+            <p style="color:#888;padding:2rem;text-align:center;">No reservations yet.</p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RULES SECTION -->
+      <section id="section-rules" style="display:none;">
+        <div class="page-header">
+          <h1 class="page-title">Lab Sit-In Rules</h1>
+          <p class="page-subtitle">Please follow these regulations while using the lab.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">Rules and Regulations</div>
+          <div style="padding:1rem;line-height:1.6;color:rgba(0,0,0,0.85);">
+            <ol style="margin:0;padding-left:1.25rem;font-weight:bold;font-size:1.1em;">
+              <li>Bring your valid student ID and present it when requested.</li>
+              <li>Stay only in the assigned laboratory and do not enter restricted areas.</li>
+              <li>Respect lab equipment and avoid moving devices without permission.</li>
+              <li>Keep noise to a minimum and avoid disturbing other students.</li>
+              <li>Follow the instructor or lab assistant instructions at all times.</li>
+              <li>Eat and drink are not allowed inside the lab unless explicitly permitted.</li>
+              <li>Report any issues or damages immediately to the lab administrator.</li>
+              <li>End your sit-in session promptly when your work is completed.</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <!-- ANNOUNCEMENTS SECTION -->
+      <section id="section-announcements" style="display:none;">
+        <div class="page-header">
+          <h1 class="page-title">Announcements</h1>
+          <p class="page-subtitle">Read messages posted by the administration.</p>
+        </div>
+        <div class="card">
+          <div id="student-announcement-list" class="announcement-list">
+            <p style="color:#888;padding:2rem;text-align:center;">No current announcements.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- FEEDBACK SECTION -->
+      <section id="section-feedback" style="display:none;">
+        <div class="page-header">
+          <h1 class="page-title">Feedback</h1>
+          <p class="page-subtitle">Share your sit-in experience with the administration.</p>
+        </div>
+        <div class="card" style="max-width:760px;">
+          <div id="feedback-alert" class="alert"></div>
+          <div class="form-group">
+            <label class="form-label">Your Feedback</label>
+            <textarea id="feedback-message" class="form-control" rows="5" placeholder="Tell us about your sit-in experience..."></textarea>
+          </div>
+          <button class="btn btn-primary" onclick="submitFeedback()">Submit Feedback</button>
+        </div>
+        <div class="card" style="margin-top:1rem;">
+          <div class="card-title">My Feedback</div>
+          <div id="student-feedback-list" class="announcement-list">
+            <p style="color:#888;padding:2rem;text-align:center;">No feedback submitted yet.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROFILE SECTION -->
+      <section id="section-profile" style="display:none;">
+        <div class="page-header">
+          <h1 class="page-title">Edit Profile</h1>
+          <p class="page-subtitle">Update your personal information.</p>
+        </div>
+        <div id="profile-hero" class="profile-hero">
+          <div class="profile-avatar" id="prof-avatar">?</div>
+          <div class="profile-info">
+            <h2 id="prof-name">—</h2>
+            <p id="prof-id">ID: —</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Personal Information</div>
+          <div id="profile-alert" class="alert"></div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Last Name</label>
+              <input type="text" id="edit-lastName" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">First Name</label>
+              <input type="text" id="edit-firstName" class="form-control">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Middle Name</label>
+            <input type="text" id="edit-middleName" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="edit-email" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Address</label>
+            <input type="text" id="edit-address" class="form-control">
+          </div>
+          <div class="divider"></div>
+          <div class="card-title">Change Password</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">New Password</label>
+              <input type="password" id="edit-password" class="form-control" placeholder="Leave blank to keep current">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirm Password</label>
+              <input type="password" id="edit-confirm" class="form-control" placeholder="Repeat new password">
+            </div>
+          </div>
+          <button class="btn btn-primary" style="width:auto;padding:0.7rem 2rem;" onclick="saveProfile()">Save Changes</button>
+        </div>
+      </section>
+
+      <!-- REWARDS SECTION -->
+      <section id="section-rewards" style="display:none;">
+        <div class="page-header">
+          <h1 class="page-title">My Rewards</h1>
+          <p class="page-subtitle">View your earned points and rewards.</p>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon gold">🏆</div>
+            <div>
+              <div class="stat-value" id="stat-total-points">0</div>
+              <div class="stat-label">Total Points</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Reward History</div>
+          <div id="student-rewards-list" class="announcement-list">
+            <p style="color:#888;padding:2rem;text-align:center;">No rewards yet.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- RECORDS SECTION -->
+      <section id="section-records" style="display:none;">
+        <div class="page-header">
+          <h1 class="page-title">My Sit-In Records</h1>
+          <p class="page-subtitle">View your complete sit-in history.</p>
+        </div>
+        <div class="card">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Date</th>
+                  <th>Lab</th>
+                  <th>Purpose</th>
+                  <th>Time In</th>
+                  <th>Time Out</th>
+                  <th>Duration</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="records-tbody">
+                <tr><td colspan="8" style="text-align:center;color:#888;padding:2rem;">No records found.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- NOTIFICATIONS SECTION -->
+      <section id="section-notifications" style="display:none;">
+        <div class="page-header">
+          <h1 class="page-title">Notifications</h1>
+          <p class="page-subtitle">Stay updated with important announcements and alerts.</p>
+        </div>
+        <div class="card">
+          <div style="display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;">
+            <button class="btn btn-sm" onclick="filterNotifications('all')" id="btn-all-notif" style="background:var(--ccs-blue-btn);color:#fff;">All</button>
+            <button class="btn btn-sm" onclick="filterNotifications('unread')" id="btn-unread-notif">Unread</button>
+            <button class="btn btn-sm" onclick="filterNotifications('read')" id="btn-read-notif">Read</button>
+            <button class="btn btn-sm btn-danger" onclick="clearAllNotifications()" style="margin-left:auto;">Clear All</button>
+          </div>
+          <div id="notifications-list" class="announcement-list">
+            <p style="color:#888;padding:2rem;text-align:center;">No notifications yet.</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    let currentUser = Auth.require(false);
+    if (!currentUser || currentUser.role === 'admin') window.location.href = '../pages/admin-dashboard.html';
+
+    let timerInterval = null;
+
+    function init() {
+      setNavUser();
+      loadUser();
+      updateStats();
+      checkActiveSitin();
+      loadAnnouncements();
+      loadRewards();
+      loadFeedback();
+      updateNotificationBadge();
+    }
+
+    function loadUser() {
+      currentUser = Auth.current();
+      document.getElementById('welcome-msg').textContent = `Welcome, ${currentUser.first_name}!`;
+      document.getElementById('nav-user-name').textContent = `${currentUser.first_name} ${currentUser.last_name}`;
+      document.getElementById('sb-name').textContent = `${currentUser.first_name} ${currentUser.last_name}`;
+      document.getElementById('sb-avatar').textContent = currentUser.first_name[0] + currentUser.last_name[0];
+      loadProfile();
+    }
+
+    async function updateStats() {
+      currentUser = Auth.current();
+      const records = await SitIn.getByStudent(currentUser.id_number);
+      document.getElementById('stat-sessions').textContent = currentUser.remainingSessions;
+      document.getElementById('stat-total').textContent = records.length;
+      document.getElementById('stat-done').textContent = records.filter(r => r.status === 'done').length;
+      document.getElementById('stat-active').textContent = records.filter(r => r.status === 'active').length;
+    }
+
+    async function checkActiveSitin() {
+      currentUser = Auth.current();
+      const sitins = await SitIn.getAll();
+      const active = sitins.find(s => s.studentId === currentUser.id_number && s.status === 'active');
+      const box = document.getElementById('current-sitin-box');
+      const reqBox = document.getElementById('sitin-request-box');
+
+      if (active) {
+        box.style.display = 'block';
+        reqBox.style.display = 'none';
+        document.getElementById('cs-lab').textContent = active.lab;
+        document.getElementById('cs-purpose').textContent = 'Purpose: ' + active.purpose;
+        document.getElementById('cs-timein').textContent = 'Time In: ' + SitIn.formatTime(active.timeIn);
+        startTimer(active.timeIn);
+      } else {
+        box.style.display = 'none';
+        reqBox.style.display = 'block';
+        if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+        // If there's a pending request, show message and disable request button
+        const pending = sitins.find(s => s.studentId === currentUser.id_number && s.status === 'pending');
+        const btn = document.getElementById('sitin-request-btn');
+        if (pending) {
+          showAlert('sitin-alert', 'You have a pending sit-in request. Waiting for admin approval.');
+          if (btn) btn.disabled = true;
+        } else {
+          if (btn) btn.disabled = false;
+        }
+      }
+    }
+
+    function startTimer(timeIn) {
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        const diff = Math.floor((Date.now() - new Date(timeIn)) / 1000);
+        const h = Math.floor(diff / 3600).toString().padStart(2, '0');
+        const m = Math.floor((diff % 3600) / 60).toString().padStart(2, '0');
+        const s = (diff % 60).toString().padStart(2, '0');
+        const el = document.getElementById('cs-timer');
+        if (el) el.textContent = `${h}:${m}:${s}`;
+      }, 1000);
+    }
+
+    async function requestSitin() {
+      currentUser = Auth.current();
+      if (currentUser.remainingSessions <= 0) {
+        showAlert('sitin-alert', 'You have no remaining sessions. Please contact admin.');
+        return;
+      }
+      const purpose = document.getElementById('sitin-purpose').value;
+      const lab = document.getElementById('sitin-lab').value;
+      // If there's an existing pending request, prevent duplicate
+      const pendingList = await SitIn.getAll();
+      const pending = pendingList.find(s => s.studentId === currentUser.id_number && s.status === 'pending');
+      if (pending) { showAlert('sitin-alert', 'You already have a pending request. Please wait for admin approval.'); return; }
+
+      const result = await SitIn.request(currentUser.id_number, `${currentUser.first_name} ${currentUser.last_name}`, purpose, lab);
+      if (result.error) { showAlert('sitin-alert', result.error); return; }
+      showAlert('sitin-alert', 'Request submitted. Waiting for admin approval.', 'success');
+      // refresh stats (remainingSessions unchanged) and UI
+      loadUser();
+      updateStats();
+      checkActiveSitin();
+    }
+
+    // ----- Reservations UI -----
+    let selectedPCs = new Set();
+
+    function renderPCGrid() {
+      const grid = document.getElementById('pc-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      for (let i = 1; i <= 50; i++) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'pc-box';
+        btn.style.padding = '0.6rem';
+        btn.style.borderRadius = '0.45rem';
+        btn.style.border = '1px solid rgba(0,0,0,0.06)';
+        btn.style.background = '#e9fff0';
+        btn.style.cursor = 'pointer';
+        btn.textContent = i;
+        btn.dataset.pc = i;
+        btn.onclick = () => togglePC(i);
+        grid.appendChild(btn);
+      }
+      updatePCAvailability();
+    }
+
+    function updatePCAvailability() {
+      const lab = document.getElementById('res-lab')?.value;
+      const date = document.getElementById('res-date')?.value;
+      const start = document.getElementById('res-start')?.value;
+      const end = document.getElementById('res-end')?.value;
+      for (const btn of Array.from(document.querySelectorAll('#pc-grid button'))) {
+        const pc = parseInt(btn.dataset.pc, 10);
+        let available = true;
+        if (lab && date && start && end) available = Reservations.isAvailable(lab, pc, date, start, end);
+        btn.disabled = !available;
+        btn.style.background = available ? (selectedPCs.has(pc) ? 'var(--ccs-success)' : '#e9fff0') : '#f3f3f3';
+        btn.style.opacity = available ? '1' : '0.6';
+        btn.style.cursor = available ? 'pointer' : 'not-allowed';
+      }
+    }
+
+    function togglePC(pc) {
+      const btn = document.querySelector(`#pc-grid button[data-pc="${pc}"]`);
+      if (!btn || btn.disabled) return;
+      if (selectedPCs.has(pc)) selectedPCs.delete(pc);
+      else selectedPCs.add(pc);
+      updatePCAvailability();
+    }
+
+    async function submitReservation() {
+      const purpose = document.getElementById('res-purpose').value;
+      const lab = document.getElementById('res-lab').value;
+      const date = document.getElementById('res-date').value;
+      const start = document.getElementById('res-start').value;
+      const end = document.getElementById('res-end').value;
+      const pcs = Array.from(selectedPCs);
+      if (!date || !start || !end) { showAlert('reservation-alert', 'Please select date and start/end times.'); return; }
+      if (!pcs.length) { showAlert('reservation-alert', 'Please select at least one PC.'); return; }
+      // Check availability again
+      for (const pc of pcs) {
+        if (!Reservations.isAvailable(lab, pc, date, start, end)) {
+          showAlert('reservation-alert', `PC ${pc} is no longer available.`);
+          updatePCAvailability();
+          return;
+        }
+      }
+      const user = Auth.current();
+      await Reservations.post(user.id_number, `${user.first_name} ${user.last_name}`, lab, pcs, date, start, end, purpose);
+      showAlert('reservation-alert', 'Reservation saved.');
+      selectedPCs.clear();
+      updatePCAvailability();
+      loadMyReservations();
+    }
+
+    async function loadMyReservations() {
+      const user = Auth.current();
+      const list = await Reservations.getByStudent(user.idNumber);
+      const container = document.getElementById('my-reservations');
+      if (!container) return;
+      if (!list.length) {
+        container.innerHTML = '<p style="color:#888;padding:2rem;text-align:center;">No reservations yet.</p>';
+        return;
+      }
+      container.innerHTML = list.map(r => `
+        <div class="announcement-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong>${r.lab} — ${r.date} ${r.startTime}–${r.endTime}</strong>
+            <span style="font-size:0.9rem;color:#666;">${r.pcs.map(p=>p).join(', ')}</span>
+          </div>
+          <p style="margin:0.5rem 0 0 0;white-space:pre-wrap;">Purpose: ${r.purpose || '—'}</p>
+        </div>`).join('');
+    }
+
+    // Re-render grid when date/time/lab changes
+    document.addEventListener('DOMContentLoaded', () => {
+      renderPCGrid();
+      ['res-lab','res-date','res-start','res-end'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', updatePCAvailability);
+      });
+      loadMyReservations();
+    });
+
+    // Close notification dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('notification-dropdown');
+      const notifBtn = e.target.closest('[onclick*="toggleNotificationDropdown"]');
+      if (!notifBtn && dropdown && dropdown.style.display === 'block') {
+        dropdown.style.display = 'none';
+      }
+    });
+
+    async function endMySitin() {
+      currentUser = Auth.current();
+      const activeList = await SitIn.getAll();
+      const active = activeList.find(s => s.studentId === currentUser.id_number && s.status === 'active');
+      if (!active) return;
+      await SitIn.end(active.id);
+      checkActiveSitin();
+      updateStats();
+    }
+
+    function showSection(name) {
+      ['dashboard', 'rules', 'announcements', 'rewards', 'feedback', 'records', 'profile', 'notifications'].forEach(s => {
+        document.getElementById('section-' + s).style.display = s === name ? 'block' : 'none';
+        document.getElementById('nav-' + s)?.classList.toggle('active', s === name);
+      });
+      // Close notification dropdown when navigating
+      document.getElementById('notification-dropdown').style.display = 'none';
+      if (name === 'records') loadRecords();
+      if (name === 'profile') loadProfile();
+      if (name === 'announcements') loadAnnouncements();
+      if (name === 'rewards') loadRewards();
+      if (name === 'feedback') loadFeedback();
+      if (name === 'notifications') loadNotifications();
+    }
+
+    function loadProfile() {
+      const u = Auth.current();
+      document.getElementById('prof-name').textContent = `${u.first_name} ${u.last_name}`;
+      document.getElementById('prof-id').textContent = 'ID: ' + u.id_number;
+      document.getElementById('prof-avatar').textContent = u.first_name[0] + u.last_name[0];
+      document.getElementById('edit-lastName').value = u.last_name;
+      document.getElementById('edit-firstName').value = u.first_name;
+      document.getElementById('edit-middleName').value = u.middle_name || '';
+      document.getElementById('edit-email').value = u.email;
+      document.getElementById('edit-address').value = u.address || '';
+    }
+
+    function saveProfile() {
+      const u = Auth.current();
+      const pw = document.getElementById('edit-password').value;
+      const confirm = document.getElementById('edit-confirm').value;
+      if (pw && pw !== confirm) { showAlert('profile-alert', 'Passwords do not match.'); return; }
+      const updates = {
+        lastName: document.getElementById('edit-lastName').value.trim(),
+        firstName: document.getElementById('edit-firstName').value.trim(),
+        middleName: document.getElementById('edit-middleName').value.trim(),
+        email: document.getElementById('edit-email').value.trim(),
+        address: document.getElementById('edit-address').value.trim()
+      };
+      if (pw) updates.password = pw;
+      Users.update(u.id_number, updates);
+      showAlert('profile-alert', 'Profile updated successfully!', 'success');
+      loadUser();
+    }
+
+    async function loadRecords() {
+      const u = Auth.current();
+      const records = (await SitIn.getByStudent(u.id_number)).reverse();
+      const tbody = document.getElementById('records-tbody');
+      if (!records.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#888;padding:2rem;">No sit-in records yet.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = records.map((r, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${r.date}</td>
+          <td>${r.lab}</td>
+          <td>${r.purpose}</td>
+          <td>${SitIn.formatTime(r.timeIn)}</td>
+          <td>${SitIn.formatTime(r.timeOut)}</td>
+          <td>${r.status === 'active' ? '<span style="color:var(--ccs-success)">Ongoing</span>' : SitIn.formatDuration(r.timeIn, r.timeOut)}</td>
+          <td><span class="badge badge-${r.status === 'active' ? 'active' : 'done'}">${r.status === 'active' ? 'Active' : 'Done'}</span></td>
+        </tr>`).join('');
+    }
+
+    async function loadAnnouncements() {
+      const list = await Announcements.getAll();
+      const container = document.getElementById('student-announcement-list');
+      if (!container) return;
+      if (!list.length) {
+        container.innerHTML = '<p style="color:#888;padding:2rem;text-align:center;">No current announcements.</p>';
+        return;
+      }
+      container.innerHTML = list.map(a => `
+        <div class="announcement-card" style="background:var(--ccs-light);border-radius:0.8rem;padding:1rem;margin-bottom:1rem;box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04);">
+          <div style="display:flex;justify-content:space-between;gap:1rem;font-size:0.9rem;color:rgba(0,0,0,0.65);align-items:center;">
+            <strong>${a.title}</strong>
+            <span>${a.date} ${a.time}</span>
+          </div>
+          <p style="margin:0.75rem 0 0 0;white-space:pre-wrap;">${a.message}</p>
+        </div>`).join('');
+    }
+
+    function submitFeedback() {
+      const message = document.getElementById('feedback-message').value.trim();
+      if (!message) { showAlert('feedback-alert', 'Please enter your feedback.'); return; }
+      const user = Auth.current();
+      Feedback.post(user.id_number, `${user.first_name} ${user.last_name}`, message);
+      document.getElementById('feedback-message').value = '';
+      showAlert('feedback-alert', 'Thank you. Your feedback has been submitted.', 'success');
+      loadFeedback();
+    }
+
+    async function loadFeedback() {
+      const user = Auth.current();
+      const list = await Feedback.getByStudent(user.idNumber);
+      const container = document.getElementById('student-feedback-list');
+      if (!container) return;
+      if (!list.length) {
+        container.innerHTML = '<p style="color:#888;padding:2rem;text-align:center;">No feedback submitted yet.</p>';
+        return;
+      }
+      container.innerHTML = list.map(f => `
+        <div class="announcement-card" style="background:var(--ccs-light);border-radius:0.8rem;padding:1rem;margin-bottom:1rem;box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04);">
+          <div style="display:flex;justify-content:space-between;gap:1rem;font-size:0.9rem;color:rgba(0,0,0,0.65);align-items:center;">
+            <strong>Feedback</strong>
+            <span>${f.date} ${f.time}</span>
+          </div>
+          <p style="margin:0.75rem 0 0 0;white-space:pre-wrap;">${f.message}</p>
+        </div>`).join('');
+    }
+
+    async function loadRewards() {
+      const user = Auth.current();
+      const totalPoints = await Rewards.getTotalPoints(user.id_number);
+      document.getElementById('stat-total-points').textContent = totalPoints;
+      const list = await Rewards.getByStudent(user.id_number);
+      const container = document.getElementById('student-rewards-list');
+      if (!container) return;
+      if (!list.length) {
+        container.innerHTML = '<p style="color:#888;padding:2rem;text-align:center;">No rewards yet.</p>';
+        return;
+      }
+      container.innerHTML = list.map(r => `
+        <div class="announcement-card" style="background:var(--ccs-light);border-radius:0.8rem;padding:1rem;margin-bottom:1rem;box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04);">
+          <div style="display:flex;justify-content:space-between;gap:1rem;font-size:0.9rem;color:rgba(0,0,0,0.65);align-items:center;">
+            <strong>+${r.points} Points</strong>
+            <span>${r.date} ${r.time}</span>
+          </div>
+          <p style="margin:0.75rem 0 0 0;">Reason: ${r.reason}</p>
+        </div>`).join('');
+    }
+
+    // Notifications is imported from app.js — do not redefine it here
+
+    function updateNotificationBadge() {
+      const user = Auth.current();
+      const unreadCount = Notifications.getByStudent(user.id_number).filter(n => !n.read).length;
+      const badge = document.getElementById('notification-badge');
+      const navBadge = document.getElementById('navbar-notif-badge');
+      if (badge) {
+        if (unreadCount > 0) {
+          badge.textContent = unreadCount;
+          badge.style.display = 'flex';
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+      if (navBadge) {
+        if (unreadCount > 0) {
+          navBadge.textContent = unreadCount;
+          navBadge.style.display = 'flex';
+        } else {
+          navBadge.style.display = 'none';
+        }
+      }
+    }
+
+    function toggleNotificationDropdown() {
+      const dropdown = document.getElementById('notification-dropdown');
+      const isVisible = dropdown.style.display === 'block';
+      dropdown.style.display = isVisible ? 'none' : 'block';
+      if (!isVisible) {
+        updateNotificationDropdown();
+      }
+    }
+
+    function updateNotificationDropdown() {
+      const user = Auth.current();
+      const notifications = Notifications.getByStudent(user.id_number).sort((a, b) => b.id - a.id).slice(0, 5);
+      const container = document.getElementById('dropdown-notif-list');
+      if (!container) return;
+      
+      if (!notifications.length) {
+        container.innerHTML = '<div style="padding:1rem;text-align:center;color:#999;font-size:0.9rem;">No new notifications</div>';
+        return;
+      }
+
+      container.innerHTML = notifications.map(n => `
+        <div class="notification-dropdown-item ${n.read ? '' : 'unread'}" onclick="showSection('notifications')">
+          <div class="notification-dropdown-item-title">${n.title}</div>
+          <div class="notification-dropdown-item-message">${n.message}</div>
+          <div class="notification-dropdown-item-time">${n.date} ${n.time}</div>
+        </div>`).join('');
+    }
+
+    function loadNotifications() {
+      const user = Auth.current();
+      const notifications = Notifications.getByStudent(user.id_number).sort((a, b) => b.id - a.id);
+      const container = document.getElementById('notifications-list');
+      if (!container) return;
+      
+      if (!notifications.length) {
+        container.innerHTML = '<p style="color:#888;padding:2rem;text-align:center;">No notifications yet.</p>';
+        return;
+      }
+
+      container.innerHTML = notifications.map(n => `
+        <div class="notification-item ${n.read ? 'read' : 'unread'}" data-notification-id="${n.id}">
+          <div class="notification-content">
+            <div class="notification-title">${n.title}</div>
+            <div class="notification-message">${n.message}</div>
+            <div class="notification-time">${n.date} ${n.time}</div>
+          </div>
+          <div class="notification-actions">
+            ${!n.read ? `<button class="notification-btn notification-mark" onclick="markNotificationRead(${n.id})" title="Mark as read">✓</button>` : ''}
+            <button class="notification-btn notification-delete" onclick="deleteNotification(${n.id})" title="Delete">✕</button>
+          </div>
+        </div>`).join('');
+      
+      currentNotificationFilter = 'all';
+    }
+
+    function markNotificationRead(notificationId) {
+      Notifications.markAsRead(notificationId);
+      loadNotifications();
+    }
+
+    function deleteNotification(notificationId) {
+      Notifications.delete(notificationId);
+      loadNotifications();
+    }
+
+    function filterNotifications(filter) {
+      const user = Auth.current();
+      const notifications = Notifications.getByStudent(user.id_number).sort((a, b) => b.id - a.id);
+      const container = document.getElementById('notifications-list');
+      let filtered = notifications;
+
+      if (filter === 'unread') {
+        filtered = notifications.filter(n => !n.read);
+      } else if (filter === 'read') {
+        filtered = notifications.filter(n => n.read);
+      }
+
+      document.getElementById('btn-all-notif').style.background = filter === 'all' ? 'var(--ccs-blue-btn)' : '';
+      document.getElementById('btn-all-notif').style.color = filter === 'all' ? '#fff' : '';
+      document.getElementById('btn-unread-notif').style.background = filter === 'unread' ? 'var(--ccs-blue-btn)' : '';
+      document.getElementById('btn-unread-notif').style.color = filter === 'unread' ? '#fff' : '';
+      document.getElementById('btn-read-notif').style.background = filter === 'read' ? 'var(--ccs-blue-btn)' : '';
+      document.getElementById('btn-read-notif').style.color = filter === 'read' ? '#fff' : '';
+
+      if (!filtered.length) {
+        container.innerHTML = `<p style="color:#888;padding:2rem;text-align:center;">No ${filter} notifications.</p>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(n => `
+        <div class="notification-item ${n.read ? 'read' : 'unread'}" data-notification-id="${n.id}">
+          <div class="notification-content">
+            <div class="notification-title">${n.title}</div>
+            <div class="notification-message">${n.message}</div>
+            <div class="notification-time">${n.date} ${n.time}</div>
+          </div>
+          <div class="notification-actions">
+            ${!n.read ? `<button class="notification-btn notification-mark" onclick="markNotificationRead(${n.id})" title="Mark as read">✓</button>` : ''}
+            <button class="notification-btn notification-delete" onclick="deleteNotification(${n.id})" title="Delete">✕</button>
+          </div>
+        </div>`).join('');
+    }
+
+    function clearAllNotifications() {
+      if (confirm('Are you sure you want to delete all notifications?')) {
+        const user = Auth.current();
+        Notifications.clearAll(user.id_number);
+        loadNotifications();
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
